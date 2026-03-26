@@ -72,6 +72,27 @@ function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;GY=H*.82}
 resize();addEventListener('resize',resize);
 
 let gState='title',frame=0,dt=1;
+
+// ═══ MUSIC SYSTEM ═══
+const menuMusic=new Audio('make_me.mp3');menuMusic.loop=true;
+const battleTracks=[new Audio('Epic 1.mp3'),new Audio('Epic 2.mp3'),new Audio('Epic 3.mp3')];
+for(const t of battleTracks)t.addEventListener('ended',()=>playNextBattle());
+let curBattle=null,battleIdx=0,musicStarted=false;
+function startMenuMusic(){if(!musicStarted)return;stopBattle();menuMusic.currentTime=0;menuMusic.volume=1;menuMusic.playbackRate=1;menuMusic.play().catch(()=>{})}
+function stopMenuMusic(){menuMusic.pause();menuMusic.currentTime=0}
+function startBattle(){stopMenuMusic();battleIdx=0;playBattleTrack(0)}
+function playBattleTrack(idx){if(curBattle){curBattle.pause();curBattle.currentTime=0}curBattle=battleTracks[idx];curBattle.volume=1;curBattle.playbackRate=1;curBattle.play().catch(()=>{})}
+function playNextBattle(){const pool=[0,1,2].filter(i=>i!==battleIdx);battleIdx=pool[Math.floor(Math.random()*pool.length)];playBattleTrack(battleIdx)}
+function stopBattle(){if(curBattle){curBattle.pause();curBattle.currentTime=0;curBattle=null}}
+function updMusic(){if(!musicStarted||!curBattle)return;
+  if(gState==='shop'){curBattle.volume=Math.max(.1,curBattle.volume+(.6-curBattle.volume)*.05);curBattle.playbackRate=Math.max(.3,curBattle.playbackRate+(.5-curBattle.playbackRate)*.05);return}
+  // tension-based volume: 1.0 base, up to 1.2
+  const T=tension();const tgtVol=Math.min(1.2,1+T*.2);const tgtRate=1;
+  curBattle.volume=Math.max(.1,curBattle.volume+(tgtVol-curBattle.volume)*.05);
+  curBattle.playbackRate=Math.max(.5,curBattle.playbackRate+(tgtRate-curBattle.playbackRate)*.05)}
+// First user interaction unlocks audio
+function unlockAudio(){if(musicStarted)return;musicStarted=true;if(gState==='title')startMenuMusic();removeEventListener('click',unlockAudio);removeEventListener('keydown',unlockAudio)}
+addEventListener('click',unlockAudio);addEventListener('keydown',unlockAudio);
 let tutStep=0,tutTimer=0,tutDone=false;
 const tutSteps=[
   {text:'MOVE with A / D',key:'a',alt:'d',dur:90},
@@ -532,7 +553,7 @@ function pHit(dmg,fx){
       emitP(P.x,P.y-40,'#ffcc00',50,10,40,6);emitP(P.x,P.y-40,'#fff',25,8,30,5);
       for(let i=0;i<12;i++){const a=6.28/12*i;parts.push({x:P.x+Math.cos(a)*30,y:P.y-40+Math.sin(a)*30,vx:Math.cos(a)*4,vy:Math.sin(a)*4,life:20,ml:20,c:'#ffcc00',sz:4,g:0})}
       return}
-    P.hp=0;gState='death';showScr('died');slo(40,.1);
+    P.hp=0;gState='death';showScr('died');slo(40,.1);stopBattle();startMenuMusic();
     emitP(P.x,P.y-40,'#ff0000',60,10,60,6);
     emitP(P.x,P.y-40,'#fff',30,8,50,5);
     for(let i=0;i<15;i++)parts.push({x:P.x+rng(-20,20),y:P.y-rng(20,60),vx:rng(-6,6),vy:rng(-10,-3),life:rng(30,60),ml:60,c:'#ff3333',sz:rng(2,5),g:.12})}
@@ -1258,8 +1279,8 @@ function startGame(){hideScrs();initBg();parts=[];slashFx=[];warns=[];spikes=[];
   P.airBonus=0;P.diveBomb=false;P.lifesteal=0;P.thorns=0;P.magnetRange=80;P.bonusCoins=0;
   P.shield=false;P.rage=false;P.secondWind=false;P.critChance=0;P.critMult=2;P.dcBonus=0;
   loopCount=0;
-  phase='prewaves';waveNum=0;waveWait=0;vm1Ref=null;trn={on:false,t:0,x:0,done:false};coinDrops=[];resetP();gState='playing';spawnWave(1)}
-function retryBoss(){hideScrs();startBossPhase()}
+  phase='prewaves';waveNum=0;waveWait=0;vm1Ref=null;trn={on:false,t:0,x:0,done:false};coinDrops=[];resetP();gState='playing';startBattle();spawnWave(1)}
+function retryBoss(){hideScrs();startBossPhase();startBattle()}
 
 // ═══ HIT DETECTION ═══
 function checkHits(){const ab=pAtkBox();if(!ab)return;
@@ -1334,6 +1355,7 @@ function drHUD(){
 function loop(){
   requestAnimationFrame(loop);frame++;
   jp={};for(const k in keys){if(keys[k]&&!pKeys[k])jp[k]=true}pKeys={...keys};
+  updMusic();
   if(gState==='shop')return; // freeze game during shop
 
   dt=1;if(slT>0){dt=slMo;slT--;if(slT<=0)slMo=1}
