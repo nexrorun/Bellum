@@ -1356,7 +1356,7 @@ function loop(){
   requestAnimationFrame(loop);frame++;
   jp={};for(const k in keys){if(keys[k]&&!pKeys[k])jp[k]=true}pKeys={...keys};
   updMusic();
-  if(gState==='shop')return; // freeze game during shop
+  if(gState==='shop'){cx.save();drBg();updParts();drParts();cx.restore();return}
 
   dt=1;if(slT>0){dt=slMo;slT--;if(slT<=0)slMo=1}
   let sx=0,sy=0;if(shkD>0){sx=(Math.random()-.5)*shkI*2;sy=(Math.random()-.5)*shkI*2;shkD-=dt;if(shkD<=0)shkI=0}
