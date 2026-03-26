@@ -864,7 +864,7 @@ class BossBase{
 
 // ═══ BOSS 1: SENTINEL (HP ~20 light hits) ═══
 class Sentinel extends BossBase{
-  constructor(){super({name:'THE SENTINEL',title:'Guardian of the Gate',col:'#3399ff',hp:3500,sc:42,hs:12,atkT:110})}
+  constructor(){super({name:'THE SENTINEL',title:'Guardian of the Gate',col:'#3399ff',hp:5000,sc:42,hs:12,atkT:110})}
   update(){const DS=bossDmgScale();this.anim+=.04*dt;this.fP();this.atkT-=dt;this.updProj();if(this.hf>0)this.hf-=dt;
     const d=this.dTP(),ms=this.ph===1?2.2:1.5;
     if(this.hp<this.mhp*.5&&this.ph===0){this.ph=1;emitP(this.x,this.y-60,'#3399ff',30,6,40,4);fla('#3399ff',.3)}
@@ -1078,7 +1078,7 @@ class Crown extends BossBase{
 
 // ═══ BOSS 6: VOID MONARCH P1 ═══
 class VoidMonarchP1 extends BossBase{
-  constructor(){super({name:'VOID MONARCH',title:'Sovereign of the Abyss',col:'#c8aa40',hp:16000,sc:44,hs:12,atkT:110});
+  constructor(){super({name:'VOID MONARCH',title:'Sovereign of the Abyss',col:'#c8aa40',hp:20000,sc:44,hs:12,atkT:110});
     this.spiral=0;this.parNow=false;this.stun=false;this.stunT=0;this.transitioned=false}
   onParried(){this.stun=true;this.stunT=50;emitP(this.x,this.y-60,'#00ffff',15,5,20,3);this.st='idle';this.stt=0}
   takeDamage(d){if(this.parNow){shk(6,8);fla('#c8aa40',.3);emitP(this.x+this.f*30,this.y-50,'#c8aa40',15,5,18,3);emitSlash(this.x+this.f*50,this.y-50,this.f,'#c8aa40',70);
@@ -1129,7 +1129,7 @@ class VoidMonarchP1 extends BossBase{
 
 // ═══ BOSS 6 P2: DEMON ═══
 class VoidMonarchP2 extends BossBase{
-  constructor(){super({name:'VOID MONARCH',title:'Abyssal Demon Form',col:'#cc2233',hp:18000,sc:50,hs:13,atkT:110});this.tele=false;this.teleX=0;this.teleT=0;this.wA=0}
+  constructor(){super({name:'VOID MONARCH',title:'Abyssal Demon Form',col:'#cc2233',hp:22000,sc:50,hs:13,atkT:110});this.tele=false;this.teleX=0;this.teleT=0;this.wA=0}
   onParried(){super.onParried();emitP(this.x,this.y-60,'#00ffff',15,5,20,3)}
   update(){if(this.dead)return;this.anim+=.04*dt;this.wA+=.07*dt;this.atkT-=dt;this.updProj();if(this.hf>0)this.hf-=dt;this.fP();
     if(this.tele){this.teleT-=dt;if(this.teleT<=0){emitP(this.x,this.y-50,this.col,20,6,25,4);this.x=this.teleX;this.tele=false;
