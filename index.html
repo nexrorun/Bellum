@@ -75,21 +75,23 @@ let gState='title',frame=0,dt=1;
 
 // ═══ MUSIC SYSTEM ═══
 const menuMusic=new Audio('make_me.mp3');menuMusic.loop=true;
-const battleTracks=[new Audio('Epic 1.mp3'),new Audio('Epic 2.mp3'),new Audio('Epic 3.mp3')];
+const battleTracks=[new Audio('Epic%201.mp3'),new Audio('Epic%202.mp3'),new Audio('Epic%203.mp3')];
 for(const t of battleTracks)t.addEventListener('ended',()=>playNextBattle());
 let curBattle=null,battleIdx=0,musicStarted=false;
-function startMenuMusic(){if(!musicStarted)return;stopBattle();menuMusic.currentTime=0;menuMusic.volume=1;menuMusic.playbackRate=1;menuMusic.play().catch(()=>{})}
-function stopMenuMusic(){menuMusic.pause();menuMusic.currentTime=0}
-function startBattle(){stopMenuMusic();battleIdx=0;playBattleTrack(0)}
-function playBattleTrack(idx){if(curBattle){curBattle.pause();curBattle.currentTime=0}curBattle=battleTracks[idx];curBattle.volume=1;curBattle.playbackRate=1;curBattle.play().catch(()=>{})}
+function startMenuMusic(){try{if(!musicStarted)return;stopBattle();menuMusic.currentTime=0;menuMusic.volume=1;menuMusic.playbackRate=1;menuMusic.play().catch(()=>{})}catch(e){}}
+function stopMenuMusic(){try{menuMusic.pause();menuMusic.currentTime=0}catch(e){}}
+function startBattle(){try{stopMenuMusic();battleIdx=0;playBattleTrack(0)}catch(e){}}
+function playBattleTrack(idx){try{if(curBattle){curBattle.pause();curBattle.currentTime=0}curBattle=battleTracks[idx];curBattle.volume=1;curBattle.playbackRate=1;curBattle.play().catch(()=>{})}catch(e){}}
 function playNextBattle(){const pool=[0,1,2].filter(i=>i!==battleIdx);battleIdx=pool[Math.floor(Math.random()*pool.length)];playBattleTrack(battleIdx)}
-function stopBattle(){if(curBattle){curBattle.pause();curBattle.currentTime=0;curBattle=null}}
+function stopBattle(){try{if(curBattle){curBattle.pause();curBattle.currentTime=0;curBattle=null}}catch(e){}}
 function updMusic(){if(!musicStarted||!curBattle)return;
-  if(gState==='shop'){curBattle.volume=Math.max(.1,curBattle.volume+(.6-curBattle.volume)*.05);curBattle.playbackRate=Math.max(.3,curBattle.playbackRate+(.5-curBattle.playbackRate)*.05);return}
-  // tension-based volume: 1.0 base, up to 1.2
-  const T=tension();const tgtVol=Math.min(1.2,1+T*.2);const tgtRate=1;
-  curBattle.volume=Math.max(.1,curBattle.volume+(tgtVol-curBattle.volume)*.05);
-  curBattle.playbackRate=Math.max(.5,curBattle.playbackRate+(tgtRate-curBattle.playbackRate)*.05)}
+  try{
+  if(gState==='shop'){curBattle.volume=Math.max(.1,Math.min(1,curBattle.volume+(.6-curBattle.volume)*.05));curBattle.playbackRate=Math.max(.5,curBattle.playbackRate+(.5-curBattle.playbackRate)*.05);return}
+  // tension-based volume: louder when tense (capped at 1.0 for browser compat)
+  const T=tension();const tgtVol=Math.min(1,0.7+T*.3);const tgtRate=1;
+  curBattle.volume=Math.max(.1,Math.min(1,curBattle.volume+(tgtVol-curBattle.volume)*.05));
+  curBattle.playbackRate=Math.max(.5,Math.min(2,curBattle.playbackRate+(tgtRate-curBattle.playbackRate)*.05));
+  }catch(e){}}
 // First user interaction unlocks audio
 function unlockAudio(){if(musicStarted)return;musicStarted=true;if(gState==='title')startMenuMusic();removeEventListener('click',unlockAudio);removeEventListener('keydown',unlockAudio)}
 addEventListener('click',unlockAudio);addEventListener('keydown',unlockAudio);
