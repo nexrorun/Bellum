@@ -76,7 +76,7 @@ let gState='title',frame=0,dt=1;
 // ═══ MUSIC SYSTEM ═══
 const menuMusic=new Audio('make_me.mp3');menuMusic.loop=true;
 const battleTracks=[new Audio('Epic%201.mp3'),new Audio('Epic%202.mp3'),new Audio('Epic%203.mp3')];
-for(const t of battleTracks)t.addEventListener('ended',()=>playNextBattle());
+for(const t of battleTracks){t.addEventListener('ended',()=>playNextBattle());t.addEventListener('pause',function(){if(this===curBattle&&this.currentTime>=this.duration-0.5)playNextBattle()})}
 let curBattle=null,battleIdx=0,musicStarted=false;
 function startMenuMusic(){try{if(!musicStarted)return;stopBattle();menuMusic.currentTime=0;menuMusic.volume=1;menuMusic.playbackRate=1;menuMusic.play().catch(()=>{})}catch(e){}}
 function stopMenuMusic(){try{menuMusic.pause();menuMusic.currentTime=0}catch(e){}}
@@ -84,7 +84,9 @@ function startBattle(){try{stopMenuMusic();battleIdx=0;playBattleTrack(0)}catch(
 function playBattleTrack(idx){try{if(curBattle){curBattle.pause();curBattle.currentTime=0}curBattle=battleTracks[idx];curBattle.volume=1;curBattle.playbackRate=1;curBattle.play().catch(()=>{})}catch(e){}}
 function playNextBattle(){const pool=[0,1,2].filter(i=>i!==battleIdx);battleIdx=pool[Math.floor(Math.random()*pool.length)];playBattleTrack(battleIdx)}
 function stopBattle(){try{if(curBattle){curBattle.pause();curBattle.currentTime=0;curBattle=null}}catch(e){}}
-function updMusic(){if(!musicStarted||!curBattle)return;
+function updMusic(){if(!musicStarted)return;
+  if(!curBattle&&gState!=='title')return;
+  if(!curBattle)return;
   try{
   if(gState==='shop'){curBattle.volume=Math.max(.1,Math.min(1,curBattle.volume+(.6-curBattle.volume)*.05));curBattle.playbackRate=Math.max(.5,curBattle.playbackRate+(.5-curBattle.playbackRate)*.05);return}
   // tension-based volume: louder when tense (capped at 1.0 for browser compat)
@@ -555,7 +557,7 @@ function pHit(dmg,fx){
       emitP(P.x,P.y-40,'#ffcc00',50,10,40,6);emitP(P.x,P.y-40,'#fff',25,8,30,5);
       for(let i=0;i<12;i++){const a=6.28/12*i;parts.push({x:P.x+Math.cos(a)*30,y:P.y-40+Math.sin(a)*30,vx:Math.cos(a)*4,vy:Math.sin(a)*4,life:20,ml:20,c:'#ffcc00',sz:4,g:0})}
       return}
-    P.hp=0;gState='death';showScr('died');slo(40,.1);stopBattle();startMenuMusic();
+    P.hp=0;gState='death';showScr('died');slo(40,.1);
     emitP(P.x,P.y-40,'#ff0000',60,10,60,6);
     emitP(P.x,P.y-40,'#fff',30,8,50,5);
     for(let i=0;i<15;i++)parts.push({x:P.x+rng(-20,20),y:P.y-rng(20,60),vx:rng(-6,6),vy:rng(-10,-3),life:rng(30,60),ml:60,c:'#ff3333',sz:rng(2,5),g:.12})}
@@ -1282,7 +1284,7 @@ function startGame(){hideScrs();initBg();parts=[];slashFx=[];warns=[];spikes=[];
   P.shield=false;P.rage=false;P.secondWind=false;P.critChance=0;P.critMult=2;P.dcBonus=0;
   loopCount=0;
   phase='prewaves';waveNum=0;waveWait=0;vm1Ref=null;trn={on:false,t:0,x:0,done:false};coinDrops=[];resetP();gState='playing';startBattle();spawnWave(1)}
-function retryBoss(){hideScrs();startBossPhase();startBattle()}
+function retryBoss(){hideScrs();startBossPhase()}
 
 // ═══ HIT DETECTION ═══
 function checkHits(){const ab=pAtkBox();if(!ab)return;
