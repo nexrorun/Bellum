@@ -359,11 +359,12 @@ Each boss has a unique arena with its own color palette:
 
 | Context | Track | Volume | Playback Speed |
 |---------|-------|--------|----------------|
-| Title Screen / Death | `make_me.mp3` | 1.0 | 1.0x |
+| Title Screen | `make_me.mp3` | 1.0 | 1.0x |
 | Battle (low tension) | `Epic 1/2/3.mp3` | 0.7 | 1.0x |
 | Battle (high tension) | `Epic 1/2/3.mp3` | 1.0 | 1.0x |
 | Shop | Current battle track | 0.6 | 0.5x |
 
+- Battle music **continues through death and retry** — no reset to menu music
 - Battle always starts with **Epic 1**, then randomly cycles through all 3 tracks
 - **Tension** is calculated from alive enemies (+0.12 each) and boss state (+0.5, +0.3 if low HP)
 - Volume smoothly lerps between values for seamless transitions
